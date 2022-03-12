@@ -8,7 +8,7 @@ plot_vertices = {1: [(723, 261), (863, 163), (873, 133), (794, 126), (705, 161)]
 class Plot:
     def __init__(self, vertices):
         self.vertices = vertices
-        ra
+        aidaowijdawoidj
 
 
 class Simulation:
