@@ -51,17 +51,15 @@ class Sampling:
 
     def draw(self, specific_point, all=False):
         if all:
-            self.gamedisplay.fill((0, 0, 0))
-
             # Draws the cells underneath the points for debugging
             # for cell in self.cells:
             #     self.gamedisplay.blit(self.cells[cell].image, self.cells[cell].rect)
 
             for point in self.points:
                 if point in self.available_points:
-                    color = (255, 0, 0)
-                else:
                     color = (255, 255, 255)
+                else:
+                    color = (255, 0, 0)
 
                 pygame.draw.circle(self.gamedisplay, color, (point[1], point[0]), self.circle_size,
                                    self.thickness)

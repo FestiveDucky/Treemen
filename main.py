@@ -1,5 +1,8 @@
-import pygame, os, sys, time
+
 from random import choice as ch
+
+import pygame.image
+
 from poissicDisc import *
 
 
@@ -9,44 +12,27 @@ def redrawMap(points, SIZE, thickness, gamedisplay):
 
 
 if __name__ == '__main__':
-
-    fullscreen = False
-    move = False
+    satellite_image = pygame.image.load("images/Artboard 1.png")
 
     # Titles the game
-    pygame.display.set_caption('Sampling')
+    pygame.display.set_caption('Environmental Project')
     clock = pygame.time.Clock()
 
-    if fullscreen:
-        WIDTH = 1920
-        HEIGHT = 1080
-    else:
-        WIDTH = 1001
-        HEIGHT = 560
+    WIDTH = 1920
+    HEIGHT = 1080
 
     pointRadius = 1
     thickness = 5
-    innerCircleRadius = 10
-    outerCircleRadius = 15
-    candidateSamples = 20
+    innerCircleRadius = 15
+    outerCircleRadius = 20
+    candidateSamples = 10
 
-    if move:
-        x = 1920
-        y = 30
-        os.environ['SDL_VIDEO_WINDOW_POS'] = f"{x},{y}"
-
-    if fullscreen:
-        gamedisplay = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-    else:
-        gamedisplay = pygame.display.set_mode((WIDTH, HEIGHT))
+    gamedisplay = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
 
     start = time.time()
     sampling = Sampling(50, 50, 500, 500, candidateSamples, innerCircleRadius, outerCircleRadius, gamedisplay, thickness, pointRadius)
     points = sampling.getPoints()
-    print(points)
     print(f"Time: {time.time() - start}")
-    # 222.17 (10)
-    # 108.41 (5)
 
     FPS = 20
     gameRunning = True
@@ -61,6 +47,8 @@ if __name__ == '__main__':
 
         # Clearing the display
         gamedisplay.fill((0, 0, 0))
+        gamedisplay.blit(satellite_image, satellite_image.get_rect())
+        pygame.draw.polygon(gamedisplay, (0, 0, 0), [(723, 261), (863, 163), (873, 133), (794, 126), (705, 161)])
 
         # Drawing to the screen
         redrawMap(points, pointRadius, thickness, gamedisplay)
