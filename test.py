@@ -1,7 +1,4 @@
-import math
-def distance(other_point, current_point):
-    vector = (current_point[0] - other_point[0], current_point[1] - other_point[1])
-    dis = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
-    return dis
+import random
 
-print(distance((706, 265), (692, 272)))
+acorns = [1 ,2 ,3 ,4 ,5 ,6]
+print(random.choice([True] * len(acorns) + [False] * (10 - len(acorns))))

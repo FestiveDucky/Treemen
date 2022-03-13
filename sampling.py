@@ -21,10 +21,9 @@ class Cell(pygame.sprite.Sprite):
 
 
 class Sampling:
-    def __init__(self, x1, y1, x2, y2, candidate_samples, inner_circle_radius, outer_circle_radius, gamedisplay,
+    def __init__(self, x1, y1, x2, y2, candidate_samples, inner_circle_radius, outer_circle_radius,
                  thickness, circle_size):
         # x1, y1, x2, y2 are the dimensions on where to run the algorithm
-        self.gamedisplay = gamedisplay
         self.inner_circle_radius = inner_circle_radius
         self.outer_circle_radius = outer_circle_radius
         self.thickness = thickness
@@ -52,27 +51,18 @@ class Sampling:
 
         self.createPoints(candidate_samples)
 
-    def draw(self, specific_point, all=False):
+    def draw(self, specific_point, gamedisplay, color, all=False):
         if all:
             # Draws the cells underneath the points for debugging
             # for cell in self.cells:
             #     self.gamedisplay.blit(self.cells[cell].image, self.cells[cell].rect)
 
             for point in self.points:
-                if point in self.available_points:
-                    color = (255, 255, 255)
-                else:
-                    color = (255, 0, 0)
-
-                pygame.draw.circle(self.gamedisplay, color, (point[1], point[0]), self.circle_size,
+                pygame.draw.circle(gamedisplay, color, (point[1], point[0]), self.circle_size,
                                    self.thickness)
 
         else:
-            if specific_point in self.available_points:
-                color = (255, 255, 255)
-            else:
-                color = (255, 0, 0)
-            pygame.draw.circle(self.gamedisplay, color, (specific_point[1], specific_point[0]),
+            pygame.draw.circle(gamedisplay, color, (specific_point[1], specific_point[0]),
                                self.circle_size, self.thickness)
         pygame.display.update()
 
@@ -146,7 +136,6 @@ class Sampling:
                     continue
 
                 percentage = 0.05
-                print(len(block_border_points))
                 skip_by = int(len(block_border_points) * percentage)
                 list_to_check = block_border_points[:]
                 while True:
@@ -188,15 +177,11 @@ class Sampling:
                     self.available_points.append(new_candidate)
                     self.cells[point_cell].add_point(new_candidate)
                     self.available_cells.pop(point_cell)
-                    new_point = new_candidate
                     finished = True
                     break
 
             if not finished:
                 self.available_points.remove(current_point)
-                self.draw(current_point)
-            else:
-                self.draw(new_point)
 
             if len(self.available_points) > 0:
                 current_point = ch(self.available_points)

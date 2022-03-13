@@ -1,7 +1,7 @@
 from random import choice as ch
 
 import pygame.image
-
+from simulation import *
 from sampling import *
 
 
@@ -9,7 +9,7 @@ def redrawMap(points, SIZE, thickness, gamedisplay):
     for point in points:
         pygame.draw.circle(gamedisplay, (255, 255, 255), (point[1], point[0]), SIZE, thickness)
 
-
+# TODO add key
 if __name__ == '__main__':
     satellite_image = pygame.image.load("images/Artboard 1.png")
 
@@ -20,19 +20,27 @@ if __name__ == '__main__':
     WIDTH = 1920
     HEIGHT = 1080
 
+    years = 100
+    max_trees = 150
+
+    # TODO move values underneath into actual function call
     pointRadius = 1
     thickness = 5
-    innerCircleRadius = 60
-    outerCircleRadius = 70
+    innerCircleRadius = 100
+    outerCircleRadius = 110
     candidateSamples = 20
 
     gamedisplay = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
     # 1371
     start = time.time()
-    sampling = Sampling(700, 100, 1850, 1000, candidateSamples, innerCircleRadius, outerCircleRadius, gamedisplay, thickness,
+    sampling = Sampling(700, 100, 1850, 1000, candidateSamples, innerCircleRadius, outerCircleRadius, thickness,
                         pointRadius)
     points = sampling.getPoints()
     print(f"Time: {time.time() - start}")
+
+    simulation = Simulation(points, years, max_trees)
+
+    end_first_sim = False
 
     FPS = 20
     gameRunning = True
@@ -49,6 +57,9 @@ if __name__ == '__main__':
                 a.append(e.pos)
                 print(a)
 
+        if not end_first_sim:
+            end_first_sim = simulation.one_year(gamedisplay)
+
         # Clearing the display
         gamedisplay.fill((0, 0, 0))
         gamedisplay.blit(satellite_image, satellite_image.get_rect())
@@ -56,7 +67,8 @@ if __name__ == '__main__':
 
         # Drawing to the screen
         redrawMap(points, pointRadius, thickness, gamedisplay)
-        sampling.draw(None, True)
+        simulation.get_trees_group().draw(gamedisplay)
+        # sampling.draw(None, gamedisplay, (255, 0, 0), True)
 
         # Updating the display
         pygame.display.update()
