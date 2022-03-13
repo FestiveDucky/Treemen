@@ -1,6 +1,6 @@
 import pygame.sprite
 from sampling import *
-from random import choice as ch
+from random import choice as ch, randint as ri
 
 
 # TODO add images to trees and acorns, make some trees mature vs. other being "unmature"
@@ -9,7 +9,6 @@ class Tree(pygame.sprite.Sprite):
     def __init__(self, master, group, coords):
         super().__init__(group)
         self.master = master
-        self.life_span = 0
         self.coords = coords
         self.acorns_sample = None
         self.acorns = []
@@ -21,7 +20,7 @@ class Tree(pygame.sprite.Sprite):
         if len(self.acorns) >= 20:
             new_tree = ch(self.acorns)
         else:
-            create_tree = ch([True] * len(self.acorns) + [False] * (100 - len(self.acorns)))
+            create_tree = ch([True] * len(self.acorns) + [False] * (20 - len(self.acorns)))
             if create_tree:
                 new_tree = ch(self.acorns)
             else:
@@ -44,6 +43,7 @@ class Simulation:
         self.trees = {}
         self.trees_group = pygame.sprite.Group()
         self.year = 0
+        self.total_tree_years = 0
         self.tree_cap = tree_cap
         self.last_year = max
         for coords in tree_coords:
@@ -53,6 +53,18 @@ class Simulation:
     def one_year(self, gamedisplay):
         self.year += 1
         print(self.year)
+        self.total_tree_years += len(self.trees)
+
+        remove = []
+        for tree in self.trees:
+            num = ri(1, 100)
+            if num <= 10:
+                self.trees[tree].kill()
+                remove.append(tree)
+
+        for coords in remove:
+            self.trees.pop(coords)
+
         if self.year % 2 == 0:
             new_trees = []
             for tree in self.trees:
@@ -61,6 +73,7 @@ class Simulation:
             for tree in new_trees:
                 if tree is not None:
                     self.trees[tree.coords] = tree
+
         if self.year == self.last_year:
             return True
         else:

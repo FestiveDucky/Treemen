@@ -97,7 +97,6 @@ class Sampling:
 
         while True:
             finished = False
-            new_point = None
             for i in range(candidate_samples):
                 self.checkEvents()
 
