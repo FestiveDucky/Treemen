@@ -4,4 +4,4 @@ def distance(other_point, current_point):
     dis = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
     return dis
 
-print(distance((44, 50), (43, 59)))
+print(distance((706, 265), (692, 272)))
