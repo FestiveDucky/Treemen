@@ -1,64 +1,47 @@
 import pygame.sprite
-from sampling import *
+
 from random import choice as ch, randint as ri
 
 
 # TODO add images to trees and acorns, make some trees mature vs. other being "unmature"
 
 class Tree(pygame.sprite.Sprite):
-    def __init__(self, master, group, coords):
+    def __init__(self, master, group, coords, cell):
         super().__init__(group)
         self.master = master
         self.coords = coords
-        self.acorns_sample = None
-        self.acorns = []
-        self.image = pygame.Surface((10, 10))
+        self.cell = cell
+        self.image = pygame.Surface((15, 15))
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect(centerx=self.coords[1], centery=self.coords[0])
 
-    def make_tree(self):
-        if len(self.acorns) >= 20:
-            new_tree = ch(self.acorns)
-        else:
-            create_tree = ch([True] * len(self.acorns) + [False] * (20 - len(self.acorns)))
-            if create_tree:
-                new_tree = ch(self.acorns)
-            else:
-                return
-
-        tree = Tree(self.master, self.master.trees_group, new_tree)
-        return tree
-
-    def acorn_cycle(self, gamedisplay, reached_tree_cap):
-        # Each acorn sprite represents 1000 real acorns
-        self.acorns_sample = Sampling(self.coords[1] - 30, self.coords[0] - 30, self.coords[1] + 30, self.coords[0] + 30, 20, 20, 25, 5, 1)
-        self.acorns = self.acorns_sample.getPoints()
-        self.acorns_sample.draw(None, gamedisplay, (0, 255, 0), True)
-        if not reached_tree_cap:
-            return self.make_tree()
+    def delete(self):
+        self.master.available_cells[self.cell] = self.master.cells[self.cell]
+        self.master.cells[self.cell].remove_point()
+        self.master.points.remove(self.coords)
 
 
 class Simulation:
-    def __init__(self, tree_coords, max, tree_cap):
+    def __init__(self, total_years):
         self.trees = {}
         self.trees_group = pygame.sprite.Group()
         self.year = 0
-        self.total_tree_years = 0
-        self.tree_cap = tree_cap
-        self.last_year = max
-        for coords in tree_coords:
-            self.trees[coords] = Tree(self, self.trees_group, coords)
-        print(len(tree_coords))
+        self.sampling = None
+        self.average_trees_alive = 0
+        self.total_years = total_years
 
     def one_year(self, gamedisplay):
         self.year += 1
         print(self.year)
-        self.total_tree_years += len(self.trees)
-
+        self.average_trees_alive += len(self.trees)
+        print(f"Average Trees: {self.average_trees_alive // self.year}")
+        # TODO every 20 years kill 75% of trees
         remove = []
         for tree in self.trees:
             num = ri(1, 100)
-            if num <= 10:
+            # 27
+            if num <= 30:
+                self.trees[tree].delete()
                 self.trees[tree].kill()
                 remove.append(tree)
 
@@ -66,15 +49,18 @@ class Simulation:
             self.trees.pop(coords)
 
         if self.year % 2 == 0:
-            new_trees = []
+            trees_to_add = []
             for tree in self.trees:
-                new_trees.append(self.trees[tree].acorn_cycle(gamedisplay, self.tree_cap <= len(self.trees)))
+                # TODO make more biased to higher values
+                self.sampling.outer_circle_radius = ri(60, 120)
+                self.sampling.inner_circle_radius = self.sampling.outer_circle_radius - ri(30, 50)
+                trees_to_add.append(self.sampling.sampling(20, tree, gamedisplay))
 
-            for tree in new_trees:
+            for tree in trees_to_add:
                 if tree is not None:
                     self.trees[tree.coords] = tree
 
-        if self.year == self.last_year:
+        if self.year == self.total_years:
             return True
         else:
             return False

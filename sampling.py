@@ -1,4 +1,5 @@
 import pygame, time, math
+from simulation import Tree
 from random import randint as ri
 from random import choice as ch
 
@@ -19,10 +20,13 @@ class Cell(pygame.sprite.Sprite):
     def add_point(self, point):
         self.point = point
 
+    def remove_point(self):
+        self.point = None
+
 
 class Sampling:
     def __init__(self, x1, y1, x2, y2, candidate_samples, inner_circle_radius, outer_circle_radius,
-                 thickness, circle_size):
+                 thickness, circle_size, simulation):
         # x1, y1, x2, y2 are the dimensions on where to run the algorithm
         self.inner_circle_radius = inner_circle_radius
         self.outer_circle_radius = outer_circle_radius
@@ -30,6 +34,8 @@ class Sampling:
         self.circle_size = circle_size
         self.points = []
         self.available_points = []
+        self.simulation = simulation
+        self.simulation.sampling = self
 
         self.x1 = x1
         self.y1 = y1
@@ -96,93 +102,104 @@ class Sampling:
         self.available_points.append(current_point)
 
         while True:
-            finished = False
-            for i in range(candidate_samples):
-                self.checkEvents()
+            tree = self.sampling(candidate_samples, current_point)
 
-                angle = ri(1, 360)
-                distance = ri(self.inner_circle_radius, self.outer_circle_radius)
-                new_candidate = self.new_point(angle, distance, current_point)
-                if self.distance(tuple(map(round, new_candidate)), current_point) > self.outer_circle_radius:
-                    new_candidate = tuple(map(int, new_candidate))
-                else:
-                    new_candidate = tuple(map(round, new_candidate))
-                if self.y2 <= new_candidate[0] or new_candidate[0] < self.y1 or self.x2 <= new_candidate[1] or \
-                        new_candidate[1] < self.x1:
-                    continue
-
-                point_cell = (
-                int(new_candidate[0] / self.cell_side_length), int(new_candidate[1] / self.cell_side_length))
-
-                if self.cells[point_cell].point is not None:
-                    continue
-
-                nearby_points = []
-                for ny in range(point_cell[0] - 3, point_cell[0] + 3):
-                    for nx in range(point_cell[1] - 3, point_cell[1] + 3):
-                        if self.y1 // self.cell_side_length <= ny < self.y2 // self.cell_side_length and self.x1 // self.cell_side_length <= nx < self.x2 // self.cell_side_length and (
-                        ny, nx) not in self.available_cells:
-                            nearby_points.append(self.cells[(ny, nx)].point)
-
-                distances = list(set(list(map(self.distance, nearby_points, [new_candidate] * len(nearby_points)))))
-                failed = False
-                for dis in distances:
-                    if dis <= self.inner_circle_radius:
-                        failed = True
-                        break
-
-                if failed:
-                    continue
-
-                percentage = 0.05
-                skip_by = int(len(block_border_points) * percentage)
-                list_to_check = block_border_points[:]
-                while True:
-                    closest = []
-                    final = False
-                    if skip_by <= 1:
-                        final = True
-                        skip_by = 1
-
-                    for coords in list_to_check[0::skip_by]:
-                        dis = self.distance((coords[1], coords[0]), new_candidate)
-                        if len(closest) == 0:
-                            closest = [coords, dis]
-                        else:
-                            if dis < closest[1]:
-                                closest = [coords, dis]
-
-                    if final:
-                        if closest[1] < 80:
-                            failed = True
-                        break
-
-                    index = list_to_check.index(closest[0])
-                    if index < skip_by:
-                        first = index
-                        second = skip_by + 1
-                    elif index >= len(block_border_points) - skip_by:
-                        first = skip_by
-                        second = (len(block_border_points) - index) + 1
-                    else:
-                        first = skip_by
-                        second = skip_by + 1
-                    list_to_check = list_to_check[index - first:index + second][:]
-                    percentage += 0.1
-                    skip_by = int(len(list_to_check) * percentage)
-
-                if not failed:
-                    self.points.append(new_candidate)
-                    self.available_points.append(new_candidate)
-                    self.cells[point_cell].add_point(new_candidate)
-                    self.available_cells.pop(point_cell)
-                    finished = True
-                    break
-
-            if not finished:
+            if tree is None:
                 self.available_points.remove(current_point)
+            else:
+                self.simulation.trees[tree.coords] = tree
 
             if len(self.available_points) > 0:
                 current_point = ch(self.available_points)
             else:
                 break
+
+    def sampling(self, candidate_samples, current_point, gamedisplay=None):
+        tree = None
+        for i in range(candidate_samples):
+            self.checkEvents()
+
+            angle = ri(1, 360)
+            distance = ri(self.inner_circle_radius, self.outer_circle_radius)
+            new_candidate = self.new_point(angle, distance, current_point)
+            if self.distance(tuple(map(round, new_candidate)), current_point) > self.outer_circle_radius:
+                new_candidate = tuple(map(int, new_candidate))
+            else:
+                new_candidate = tuple(map(round, new_candidate))
+            if self.y2 <= new_candidate[0] or new_candidate[0] < self.y1 or self.x2 <= new_candidate[1] or \
+                    new_candidate[1] < self.x1:
+                continue
+
+            failed = False
+            percentage = 0.05
+            skip_by = int(len(block_border_points) * percentage)
+            list_to_check = block_border_points[:]
+            while True:
+                closest = []
+                final = False
+                if skip_by <= 1:
+                    final = True
+                    skip_by = 1
+
+                for coords in list_to_check[0::skip_by]:
+                    dis = self.distance((coords[1], coords[0]), new_candidate)
+                    if len(closest) == 0:
+                        closest = [coords, dis]
+                    else:
+                        if dis < closest[1]:
+                            closest = [coords, dis]
+
+                if final:
+                    if closest[1] < 80:
+                        failed = True
+                    break
+
+                index = list_to_check.index(closest[0])
+                if index < skip_by:
+                    first = index
+                    second = skip_by + 1
+                elif index >= len(block_border_points) - skip_by:
+                    first = skip_by
+                    second = (len(block_border_points) - index) + 1
+                else:
+                    first = skip_by
+                    second = skip_by + 1
+                list_to_check = list_to_check[index - first:index + second][:]
+                percentage += 0.1
+                skip_by = int(len(list_to_check) * percentage)
+
+            if failed:
+                continue
+
+            # Draws the acorns
+            if gamedisplay is not None:
+                pygame.draw.circle(gamedisplay, (139, 69, 19), (new_candidate[1], new_candidate[0]),
+                                   2,
+                                   5)
+                pygame.display.update()
+
+            point_cell = (
+                int(new_candidate[0] / self.cell_side_length), int(new_candidate[1] / self.cell_side_length))
+            if self.cells[point_cell].point is not None:
+                continue
+
+            nearby_points = []
+            for ny in range(point_cell[0] - 3, point_cell[0] + 3):
+                for nx in range(point_cell[1] - 3, point_cell[1] + 3):
+                    if self.y1 // self.cell_side_length <= ny < self.y2 // self.cell_side_length and self.x1 // self.cell_side_length <= nx < self.x2 // self.cell_side_length and (
+                            ny, nx) not in self.available_cells:
+                        nearby_points.append(self.cells[(ny, nx)].point)
+
+            distances = list(set(list(map(self.distance, nearby_points, [new_candidate] * len(nearby_points)))))
+            for dis in distances:
+                if dis <= self.inner_circle_radius:
+                    failed = True
+                    break
+
+            if not failed and tree is None:
+                self.points.append(new_candidate)
+                self.available_points.append(new_candidate)
+                self.cells[point_cell].add_point(new_candidate)
+                self.available_cells.pop(point_cell)
+                tree = Tree(self, self.simulation.trees_group, new_candidate, point_cell)
+        return tree
