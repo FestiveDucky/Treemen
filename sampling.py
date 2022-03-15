@@ -26,7 +26,7 @@ class Cell(pygame.sprite.Sprite):
 
 class Sampling:
     def __init__(self, x1, y1, x2, y2, candidate_samples, inner_circle_radius, outer_circle_radius,
-                 thickness, circle_size, simulation):
+                 thickness, circle_size, simulation, num_start_trees):
         # x1, y1, x2, y2 are the dimensions on where to run the algorithm
         self.inner_circle_radius = inner_circle_radius
         self.outer_circle_radius = outer_circle_radius
@@ -36,6 +36,7 @@ class Sampling:
         self.available_points = []
         self.simulation = simulation
         self.simulation.sampling = self
+        self.start_trees = num_start_trees
 
         self.x1 = x1
         self.y1 = y1
@@ -93,13 +94,12 @@ class Sampling:
     def createPoints(self, candidate_samples):
         # Starting point
         current_point = ((self.y2 - self.y1) // 2 + self.y1, (self.x2 - self.x1) // 2 + self.x1)
-        self.cells[
-            (int(current_point[0] / self.cell_side_length), int(current_point[1] / self.cell_side_length))].add_point(
-            current_point)
+        current_cell = (int(current_point[0] / self.cell_side_length), int(current_point[1] / self.cell_side_length))
+        self.cells[current_cell].add_point(current_point)
         self.points.append(current_point)
-        self.available_cells.pop(
-            (int(current_point[0] / self.cell_side_length), int(current_point[1] / self.cell_side_length)))
+        self.available_cells.pop(current_cell)
         self.available_points.append(current_point)
+        self.simulation.trees[current_point] = Tree(self, self.simulation.trees_group, current_point, current_cell)
 
         while True:
             tree = self.sampling(candidate_samples, current_point)
@@ -109,7 +109,7 @@ class Sampling:
             else:
                 self.simulation.trees[tree.coords] = tree
 
-            if len(self.available_points) > 0:
+            if len(self.available_points) > 0 and len(self.points) < self.start_trees:
                 current_point = ch(self.available_points)
             else:
                 break
