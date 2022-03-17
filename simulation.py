@@ -44,6 +44,7 @@ class Simulation:
     def one_year(self, gamedisplay):
         self.year += 1
         self.average_trees_alive += len(self.trees)
+
         remove = []
         for tree in self.trees:
             num = ri(1, 100)

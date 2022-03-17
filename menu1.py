@@ -1,8 +1,9 @@
 import pygame
 
-BLACK = (0, 0, 0)
-ORANGE = (229, 157, 33)
-GREY = (194, 174, 145)
+ORANGE = (243, 170, 78)
+DARK_BLUE = (17, 24, 32)
+SEMI_DARK_BLUE = (47, 54, 62)
+BLUE = (77, 84, 92)
 
 
 class Slider:
@@ -17,7 +18,7 @@ class Slider:
         self.curval = curval
         self.circlex = (self.curval - self.minval) * (self.len - 40) // (self.maxval - self.minval) + self.x1 + 20
         self.slider_font = sliderfont = pygame.font.SysFont('Cambria', 25)
-        self.display_val = sliderfont.render(str(curval), True, BLACK)
+        self.display_val = sliderfont.render(str(curval), True, ORANGE)
 
     def update(self, mouse_held, screen, mouse, percent=False):
         if mouse_held:
@@ -28,10 +29,10 @@ class Slider:
             value = f"{self.curval}%"
         else:
             value = str(self.curval)
-        self.display_val = self.slider_font.render(value, True, BLACK)
+        self.display_val = self.slider_font.render(value, True, ORANGE)
         # pygame.draw.rect(screen, white, [self.x1, self.y1, self.len, 40])
-        pygame.draw.rect(screen, (154, 134, 105), [self.x1 + 15, self.y1 + 15, self.len - 30, 10])
-        pygame.draw.circle(screen, (224, 204, 175), [self.circlex, self.y1 + 20], 12)
+        pygame.draw.rect(screen, SEMI_DARK_BLUE, [self.x1 + 15, self.y1 + 15, self.len - 30, 10])
+        pygame.draw.circle(screen, BLUE, [self.circlex, self.y1 + 20], 12)
         screen.blit(self.display_val, (self.x1 + self.len + 10, self.y1 + 5))
 
 
@@ -43,34 +44,34 @@ def show_menu1(width, height, screen):
     smalltextfont = pygame.font.SysFont('Cambria', 20)
     menu_showing = True
     mouse_held = False
-    start = font.render('START', True, BLACK)
+    start = font.render('START', True, ORANGE)
 
     # Need to make the slider outside the loop otherwise it will remake the slider every frame
-    text1 = smalltextfont.render('Number of Starting Trees', True, BLACK)
+    text1 = smalltextfont.render('Number of Starting Trees', True, ORANGE)
     numtrees = Slider(150, 450, 300, 10, 30, 20)
-    text2 = smalltextfont.render('Natural Deathrate of Trees (%)', True, BLACK)
+    text2 = smalltextfont.render('Natural Deathrate of Trees (%)', True, ORANGE)
     deathrate = Slider(150, 600, 120, 1, 11, 6)
-    text3 = smalltextfont.render('Trees Planted Every Ten Years', True, BLACK)
+    text3 = smalltextfont.render('Trees Planted Every Ten Years', True, ORANGE)
     newtrees = Slider(700, 450, 140, 15, 45, 30)
-    text4 = smalltextfont.render('Trees Cut Every Ten Years (%)', True, BLACK)
+    text4 = smalltextfont.render('Trees Cut Every Ten Years (%)', True, ORANGE)
     cuttrees = Slider(700, 600, 250, 40, 60, 50)
 
-    title1 = Titlefont.render('Planting Trees to Increase', True, BLACK)
-    title2 = Titlefont.render('Carbon Dioxide Absorbtion Rate', True, BLACK)
+    title1 = Titlefont.render('Planting Trees to Increase', True, ORANGE)
+    title2 = Titlefont.render('Carbon Dioxide Absorbtion Rate', True, ORANGE)
 
-    text5 = smalltextfont.render('This Simulation Analyzes Three Scenarios', True, BLACK)
-    text6 = smalltextfont.render('CUTTING| Where Oaks are Cut for Construction and Other Purposes', True, BLACK)
-    text7 = smalltextfont.render('BASE| The Natural Tree Cycle Without Human Interference', True, BLACK)
-    text8 = smalltextfont.render('PLANTING| Where More Trees are Planted in Addition to the Base Case', True, BLACK)
+    text5 = smalltextfont.render('This Simulation Analyzes Three Scenarios', True, ORANGE)
+    text6 = smalltextfont.render('CUTTING| Where Oaks are Cut for Construction and Other Purposes', True, ORANGE)
+    text7 = smalltextfont.render('BASE| The Natural Tree Cycle Without Human Interference', True, ORANGE)
+    text8 = smalltextfont.render('PLANTING| Where More Trees are Planted in Addition to the Base Case', True, ORANGE)
 
     while menu_showing:
-        screen.fill(GREY)
+        screen.fill(DARK_BLUE)
         mouse = pygame.mouse.get_pos()
         # start button
-        if start_pos[0] <= mouse[0] <= start_pos[0] + 170 and start_pos[1] <= mouse[1] <= start_pos[1] + 50:
-            pygame.draw.rect(screen, (224, 204, 175), [start_pos[0], start_pos[1], 170, 60])
+        if start_pos[0] <= mouse[0] <= start_pos[0] + 170 and start_pos[1] <= mouse[1] <= start_pos[1] + 60:
+            pygame.draw.rect(screen, BLUE, [start_pos[0], start_pos[1], 170, 60])
         else:
-            pygame.draw.rect(screen, (154, 134, 105), [start_pos[0], start_pos[1], 170, 60])
+            pygame.draw.rect(screen, SEMI_DARK_BLUE, [start_pos[0], start_pos[1], 170, 60])
 
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
@@ -80,7 +81,7 @@ def show_menu1(width, height, screen):
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 mouse_held = True
                 # start button
-                if start_pos[0] <= mouse[0] <= start_pos[0] + 170 and start_pos[1] <= mouse[1] <= start_pos[1] + 50:
+                if start_pos[0] <= mouse[0] <= start_pos[0] + 170 and start_pos[1] <= mouse[1] <= start_pos[1] + 60:
                     menu_showing = False
 
         screen.blit(start, (start_pos[0] + 10, start_pos[1]))
@@ -98,7 +99,7 @@ def show_menu1(width, height, screen):
         screen.blit(title2, (550, 175))
 
         screen.blit(text5, (1300, 450))
-        pygame.draw.rect(screen, (154, 134, 105), [1200, 500, 600, 10])
+        pygame.draw.rect(screen, SEMI_DARK_BLUE, [1200, 500, 600, 10])
         screen.blit(text6, (1210, 550))
         screen.blit(text7, (1250, 600))
         screen.blit(text8, (1200, 650))
