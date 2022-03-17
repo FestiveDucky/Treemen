@@ -6,9 +6,8 @@ BASE = 1
 CUTTING = 2
 PLANTING = 3
 
-# TODO add images to trees and acorns, make some trees mature vs. other being "unmature"
-
 tree_image = pygame.image.load("images/trees2-02.png")
+
 
 class Tree(pygame.sprite.Sprite):
     def __init__(self, master, group, coords, cell):
@@ -42,12 +41,9 @@ class Simulation:
         self.trees_to_plant_save = 0
         self.trees_to_cut = 0
 
-
     def one_year(self, gamedisplay):
         self.year += 1
         self.average_trees_alive += len(self.trees)
-        print(self.year)
-        print(f"Average Trees: {self.average_trees_alive // self.year}")
         remove = []
         for tree in self.trees:
             num = ri(1, 100)
@@ -75,17 +71,15 @@ class Simulation:
 
         if self.year % 10 == 0:
             if self.sim_type == CUTTING:
-                print(f"Trees Cut: {int(self.trees_to_cut * len(self.trees))}")
                 for i in range(int(self.trees_to_cut * len(self.trees))):
                     self.remove_random_tree()
             elif self.sim_type == PLANTING:
-                print("Replenished")
                 self.trees_to_plant += self.trees_to_plant_save
 
         if self.year == self.total_years:
-            return True
+            return self.sim_type + 1
         else:
-            return False
+            return self.sim_type
 
     def remove_random_tree(self):
         tree = ch(list(self.trees))
