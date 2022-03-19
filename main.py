@@ -60,7 +60,6 @@ def create_sim(years_long, death_rate, sim_type, num_trees):
     return simulation, sampling
 
 
-# TODO FINAL ask albert if he borrowed any large amounts of code
 if __name__ == '__main__':
     pygame.init()
 

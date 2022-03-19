@@ -127,6 +127,7 @@ class Sampling:
                 new_candidate = tuple(map(int, new_candidate))
             else:
                 new_candidate = tuple(map(round, new_candidate))
+
             if self.y2 <= new_candidate[0] or new_candidate[0] < self.y1 or self.x2 <= new_candidate[1] or \
                     new_candidate[1] < self.x1:
                 continue
@@ -174,9 +175,7 @@ class Sampling:
 
             # Draws the acorns
             if gamedisplay is not None:
-                pygame.draw.circle(gamedisplay, (139, 69, 19), (new_candidate[1], new_candidate[0]),
-                                   2,
-                                   5)
+                pygame.draw.circle(gamedisplay, (139, 69, 19), (new_candidate[1], new_candidate[0]), 2, 5)
                 pygame.display.update()
 
             point_cell = (
