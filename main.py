@@ -72,7 +72,7 @@ if __name__ == '__main__':
     WIDTH = 1920
     HEIGHT = 1080
 
-    years = 50
+    years = 1000
 
     gamedisplay = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
 
